@@ -1,0 +1,23 @@
+* MapReduce scale model
+
+This implementation is a scale model of the MapReduce idea, based on
+the following types and [[http://kickstarthadoop.blogspot.be/2011/04/word-count-hadoop-map-reduce-example.html][this example]].
+
+- The input data is a =List[Inp]=, each element is passed to a Mapper,
+  producing an association map from =MapKey= to =Val=.
+- These =(MapKey, Val)= pairs will be passed to a shuffle function to
+  produce a new key (=ShuffleKey=).  All =Val= associated with the
+  same =ShuffleKey= are gathered in a list for the next step.
+- Then these =(ShuffleKey, List[Val])= pairs are passed to a reducer
+  function, giving =(ShuffleKey, Result)= associations.
+
+** Restrictions
+
+*** No real parallelism
+
+The work is dispatched sequentially to instances instead of
+parallelized on different workers.
+
+*** In-memory data
+
+All data is kept in RAM, effectively limiting the data size.
