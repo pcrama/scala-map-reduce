@@ -1,3 +1,5 @@
+package Main
+
 import scala.collection.{mutable, immutable}
 import scala.io.Source
 
@@ -63,26 +65,6 @@ object MapReduce {
     }
     shufflers.map(_.freeze)
   }
-}
-
-object WordCount {
-  def mapper(f: String): Map[String, Int] = {
-    val r = new mutable.HashMap[String, Int]()
-    for (line: String <- Source.fromFile(f).getLines()) {
-      val words = line.split(" ").filter(_.length > 3).map(_.toUpperCase)
-      words.foreach { w =>
-        r.put(w, r.getOrElse(w, 0) + 1)
-      }
-    }
-    r.toMap
-  }
-  // type MapFunction[Inp, MapKey, Val] = (Inp) => Map[MapKey, Val]
-  // type ShuffleFunction[MapKey, ShuffleKey, Val] = (MapKey, Val) => ShuffleKey
-  // type ReduceFunction[ShuffleKey, Val, Result] = (ShuffleKey, List[Val]) => Result
-  def shuffler(x: String, y: Any) = x
-  def reducer(k: Any, v: List[Int]) = v.foldLeft(0)(_ + _)
-  def doIt(files: List[String]): Map[String, Int] =
-    MapReduce.mapReduce[String, String, Int, String, Int](2, mapper, 4, shuffler, 3, reducer)(files)
 }
 
 object Main extends App {
