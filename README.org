@@ -21,3 +21,37 @@ parallelized on different workers.
 *** In-memory data
 
 All data is kept in RAM, effectively limiting the data size.
+
+*** Shufflers must accumulate all data
+
+The reducer works on a complete list.  If we look at the reduce
+function (=foldLeft=), one element at a time can be passed in without
+having to store the complete list.
+
+** Second attempt
+
+Rearranging the types allows to have the shuffler forward the data
+immediately to the reducer:
+
+- Mapper :: ~Inp => Iterator[(MapKey, Val)]~, using an ~Iterator~
+            instead of a ~Map~ obviates the need to store the data.
+- Shuffler :: ~(MapKey, Val) => ShuffleKey~
+- Reducer :: ~ShuffleKey => Result => Val => Result~
+
+The proposed reducer isn't equivalent to ~(ShuffleKey, List[V]) =>
+(ShuffleKey, Result)~: assuming the reducer has a ~Result~ type of
+~Either[Int, String]~ (let's say in the WordCount example that if the
+count is even, we want the result as a number (e.g. ~Left(2)~) and if
+the count is odd, we want a String (e.g. ~Right("3")~).
+
+To account for such cases, the reducer (with a new type ~ShuffleKey =>
+TempResult => Val => TempResult~) must be combined with a
+post-processing step (~(ShuffleKey, TempResult) => Result~).
+
+This way, old-style reducer functions can be expressed with
+~TempResult = List[Val]~, the new-style reducer function accumulating
+XXX...TODO...XXX and the old-style reducer function in the
+post-processing step, but more restricted reducer functions (and the
+WordCount example is one) can work with a trivial post-processing step
+(the identity function), but without building up the complete
+~List[Val]~.
