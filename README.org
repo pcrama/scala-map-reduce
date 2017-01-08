@@ -30,6 +30,8 @@ having to store the complete list.
 
 ** Second attempt
 
+!!! This isn't complete... see ActorMapReduce.scala !!!
+
 Rearranging the types allows to have the shuffler forward the data
 immediately to the reducer:
 
